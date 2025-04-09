@@ -5,20 +5,18 @@ using TMPro;
 
 public class DialogueBoxManager : MonoBehaviour
 {
-    // 대사 프리팹 관리
-
     public TMP_InputField sceneTitleInput;
-    public RectTransform dialogueContainer;           // 프리팹이 추가될 위치
-    public GameObject dialogueInputPrefab;          // 프리팹 연결
+    public RectTransform dialogueContainer;
+    public GameObject dialogueInputPrefab;
     public Button addDialogueBtn;
+
+    private float defaultY = -40f;
 
     void Start()
     {
         addDialogueBtn.onClick.AddListener(AddDialogueContainer);
-        AddDialogueContainer();
+        AddDialogueContainer(); // 최초 1개 생성
     }
-
-    private float currentDialogueY = -40f;
 
     public void AddDialogueContainer()
     {
@@ -29,20 +27,51 @@ public class DialogueBoxManager : MonoBehaviour
         boxRT.anchorMax = new Vector2(0f, 1f);
         boxRT.pivot = new Vector2(0f, 1f);
 
-        // 프리팹 높이 계산
+        // 높이 기본값
         float height = boxRT.rect.height;
-        if(height <= 0f) height = 65f;
-        
+        if (height <= 0f) height = 65f;
 
         // 위치 설정
-        boxRT.anchoredPosition = new Vector2(40f, currentDialogueY);
+        float y = -GetTotalDialogueHeight();
+        boxRT.anchoredPosition = new Vector2(40f, y);
+        RepositionAllDialogueBoxes();
+    }
 
-        // 다음 프리팹 위치 계산
-        currentDialogueY -= height;
+    public void RepositionAllDialogueBoxes()
+    {
+        float currentY = defaultY;
+
+        foreach (Transform child in dialogueContainer)
+        {
+            RectTransform boxRT = child.GetComponent<RectTransform>();
+            if (boxRT == null) continue;
+
+            float height = boxRT.rect.height;
+            if (height <= 0f) height = 65f;
+
+            boxRT.anchoredPosition = new Vector2(40f, currentY);
+            currentY -= height;
+        }
 
         dialogueContainer.sizeDelta = new Vector2(
             dialogueContainer.sizeDelta.x,
-            Mathf.Abs(currentDialogueY)
+            Mathf.Abs(currentY)
         );
+    }
+
+    private float GetTotalDialogueHeight()
+    {
+        float total = defaultY;
+        foreach (Transform child in dialogueContainer)
+        {
+            RectTransform boxRT = child.GetComponent<RectTransform>();
+            if (boxRT != null)
+            {
+                float h = boxRT.rect.height;
+                if (h <= 0f) h = 65f;
+                total -= h;
+            }
+        }
+        return Mathf.Abs(total);
     }
 }

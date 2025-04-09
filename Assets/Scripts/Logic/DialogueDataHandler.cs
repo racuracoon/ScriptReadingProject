@@ -18,13 +18,6 @@ public class DialogueDataHandler
                 string character = box.characterInput.text.Trim();
                 string line = box.dialogueInput.text.Trim();
 
-
-                if (string.IsNullOrEmpty(character) && string.IsNullOrEmpty(line))
-                {
-                    Debug.LogWarning("대사 박스가 비어있음");
-                    continue;
-                }
-
                 Dialogue dialogue = new Dialogue
                 {
                     character = character,
