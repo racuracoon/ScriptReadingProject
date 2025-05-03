@@ -1,13 +1,20 @@
 using UnityEngine;
 using TMPro;
 
-public class SceneSaveBtn : MonoBehaviour
+public class SceneUpdateBtn : MonoBehaviour
 {
     public DialogueBoxManager dialogueBoxManager;
     public TMP_InputField sceneTitleInput;
     public PanelController panelController;
+    public SceneViewer sceneViewer;
+    public SceneData editingScene;
 
-    public void OnClickSaveScene()
+    public void getScene(SceneData scene)
+    {
+        editingScene = scene;
+    }
+
+    public void OnClickUpdateScene()
     {
         var manager = UnityEngine.Object.FindFirstObjectByType<DialogueBoxManager>();
         string sceneTitle = sceneTitleInput.text.Trim();
@@ -17,8 +24,9 @@ public class SceneSaveBtn : MonoBehaviour
             return;
         }
 
-        if(manager.dialogueContainer.childCount >0){
-            SaveScene(sceneTitle);
+        if (manager.dialogueContainer.childCount > 0)
+        {
+            UpdateScene(sceneTitle);
         }
         else
         {
@@ -28,8 +36,9 @@ public class SceneSaveBtn : MonoBehaviour
 
     }
 
-    public void SaveScene(string sceneTitle)
+    public void UpdateScene(string sceneTitle)
     {
+        Debug.Log("수정 버튼 호출됨");
         foreach (Transform child in dialogueBoxManager.dialogueContainer)
         {
             DialogueInputBox box = child.GetComponent<DialogueInputBox>();
@@ -47,30 +56,23 @@ public class SceneSaveBtn : MonoBehaviour
         }
 
         var dialogues = DialogueDataHandler.ExtractDialogues(dialogueBoxManager.dialogueContainer);
-        var scene = SceneDataHandler.CreateScene(sceneTitle, dialogues);
-        ScriptDataHandler.AddScene(scene);
+        ScriptDataHandler.UpdateScene(editingScene, sceneTitle, dialogues);
 
-        Debug.Log($"씬 저장됨: {scene.title}, 대사 수: {scene.dialogues.Count}");
-        Debug.Log("현재 스크립트에 저장된 씬 목록:");
-
+        dialogueBoxManager.DeleteAllDialogues();
+        panelController.OpenAddScriptPanel();
+        sceneViewer.DisplayScenes();
         if (ScriptMemoryStore.currentScript != null && ScriptMemoryStore.currentScript.scenes != null)
         {
-            foreach (SceneData s in ScriptMemoryStore.currentScript.scenes)
+            Debug.Log("📋 currentScript에 저장된 씬 번호 리스트:");
+            foreach (var scene in ScriptMemoryStore.currentScript.scenes)
             {
-                Debug.Log($"씬 {scene.sceneNumber}: {scene.title}");
-
-                foreach (var dialogue in scene.dialogues)
-                {
-                    Debug.Log($"{dialogue.character} : {dialogue.line}");
-                }
+                Debug.Log($"- SceneNumber: {scene.sceneNumber}, Title: {scene.title}");
             }
         }
         else
         {
-            Debug.Log("⚠ 저장된 스크립트나 씬이 없습니다.");
+            Debug.LogWarning("⚠ currentScript나 scenes가 비어있습니다.");
         }
-
-        dialogueBoxManager.DeleteAllDialogues();
-        panelController.OpenAddScriptPanel();
     }
 }
+

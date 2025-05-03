@@ -33,18 +33,4 @@ public class DialogueInputBox : MonoBehaviour
         }
     }
 
-    private void RefreshLayout()
-    {
-        Debug.Log("레이아웃 조정");
-        var manager = UnityEngine.Object.FindFirstObjectByType<DialogueBoxManager>();
-        if (manager != null)
-        {
-            manager.RepositionAllDialogueBoxes();
-        }
-        else
-        {
-            Debug.LogWarning("❗ DialogueBoxManager를 찾을 수 없습니다.");
-        }
-    } 
-
 }
