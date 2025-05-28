@@ -22,3 +22,7 @@ Thumbs.db
 
 # Unity package
 *.unitypackage
+
+# env
+.env
+Assets/.env

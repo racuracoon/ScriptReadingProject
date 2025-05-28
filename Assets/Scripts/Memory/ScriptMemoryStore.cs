@@ -12,4 +12,15 @@ public static class ScriptMemoryStore
             scenes = new List<SceneData>()
         };
     }
+    public static Dialogue GetDialougeByLineId(int lineId)
+    {
+        foreach (SceneData scene in currentScript.scenes)
+        {
+            foreach (Dialogue dialogue in scene.dialogues)
+            {
+                if (dialogue.lineId == lineId) return dialogue;
+            }
+        }
+        return null;
+    }
 }

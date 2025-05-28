@@ -45,7 +45,7 @@ public class ScriptDataHandler
                 Debug.Log($"메모리:{scene.sceneNumber}");
                 Debug.Log($"업데이트 씬 : {updatingScene.sceneNumber}");
 
-                if(scene.sceneNumber == updatingScene.sceneNumber)
+                if (scene.sceneNumber == updatingScene.sceneNumber)
                 {
                     find = true;
                     scene.title = sceneTitle;
@@ -53,13 +53,15 @@ public class ScriptDataHandler
                 }
             }
         }
-        if(find == false){
+        if (find == false)
+        {
             Debug.Log("못찾음");
         }
         else
         {
             Debug.LogWarning("⚠ currentScript나 scenes가 비어있습니다.");
         }
+        DialogueManager.GrantDialogueId(updatingScene);
         Debug.Log("수정 완료");
     }
 
@@ -78,5 +80,18 @@ public class ScriptDataHandler
         {
             Debug.Log($"  └ Scene #{scene.sceneNumber} - {scene.title} (대사 {scene.dialogues.Count}개)");
         }
+    }
+
+    public static SceneData GetScene(int sceneNumber)
+    {
+        foreach (SceneData scene in ScriptMemoryStore.currentScript.scenes)
+        {
+            if (scene.sceneNumber == sceneNumber)
+            {
+                return scene;
+            }
+        }
+        Debug.LogWarning($"sceneNumber {sceneNumber}에 해당하는 씬을 찾을 수 없습니다.");
+        return null;
     }
 }
