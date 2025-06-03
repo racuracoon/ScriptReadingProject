@@ -5,19 +5,40 @@ using UnityEngine.UI;
 public class EnvironmentSetupPanel : MonoBehaviour
 {
     public Button backToMainBtn;
-    public Button saveBtn;
+    public Button modeBtn;
+    public TMP_Text modeBtnText;
     public TMP_InputField avatarUrlInput;
     public Button loadAvatarBtn;
-    public Button SaveAvatarBtn;
+    public Button saveAvatarBtn;
     public PanelController panelController;
-    
+    public MessagePanel messagePanel;
+    public TMP_InputField imagePathInput;
+    public Button loadImageBtn;
+    public Button applyImageBtn;
+    public BackgroundImageLoader backgroundImageLoader;
+
+    public GameObject characterSettingGroup;
+    public GameObject backgroundSettingGroup;
+
+    private Mode currentMode = Mode.CharacterSetting;
+
+    private enum Mode
+    {
+        CharacterSetting,
+        BackgroundSetting
+    }
+
     public CharacterData selectedCharacter;
 
     public void Start()
     {
         backToMainBtn.onClick.AddListener(OnClickBackToMainBtn);
         loadAvatarBtn.onClick.AddListener(onClickLoadAvatarBtn);
-        SaveAvatarBtn.onClick.AddListener(onClickSaveAvatarBtn);
+        saveAvatarBtn.onClick.AddListener(onClickSaveAvatarBtn);
+        modeBtn.onClick.AddListener(onClickModeBtn);
+        loadImageBtn.onClick.AddListener(onClickLoadImageBtn);
+        applyImageBtn.onClick.AddListener(OnClickApplyImageBtn);
+        SwitchMode(Mode.CharacterSetting);
     }
 
     public void OnClickBackToMainBtn()
@@ -33,7 +54,7 @@ public class EnvironmentSetupPanel : MonoBehaviour
         {
             LoadAvatorHandler.LoadAvatar(url);
         }
-        else Debug.LogWarning("url을 입력하세요");
+        else messagePanel.OpenTemporaryPanel("url을 입력해주세요");
     }
 
     private void onClickSaveAvatarBtn()
@@ -49,4 +70,57 @@ public class EnvironmentSetupPanel : MonoBehaviour
         else Debug.LogWarning("잘못된 URL");
     }
 
+    private void onClickModeBtn()
+    {
+        Mode nextMode = currentMode == Mode.BackgroundSetting
+            ? Mode.CharacterSetting
+            : Mode.BackgroundSetting;
+
+        Debug.Log($"[{currentMode} -> {nextMode}]");
+
+        SwitchMode(nextMode);
+        modeBtnText.text = nextMode == Mode.CharacterSetting ? "배경 설정" : "캐릭터외형설정";
+    }
+
+    private void onClickLoadImageBtn()
+    {
+        imagePathInput.text = backgroundImageLoader.LoadImage();
+    }
+
+    private void OnClickApplyImageBtn()
+    {
+        if (!string.IsNullOrEmpty(imagePathInput.text))
+        {
+            bool isSuccess = backgroundImageLoader.ApplyImage(imagePathInput.text);
+            if (isSuccess)
+            {
+                messagePanel.OpenTemporaryPanel("배경이 적용되었습니다.");
+            }
+            else
+            {
+                messagePanel.OpenTemporaryPanel("배경 적용에 실패했습니다.");
+            }
+        }
+        else
+        {
+            messagePanel.OpenTemporaryPanel("배경을 불러와 주세요");
+            Debug.Log(imagePathInput.text);
+        }
+    }
+
+    private void SwitchMode(Mode mode)
+    {
+        currentMode = mode;
+        if (currentMode == Mode.CharacterSetting)
+        {
+            characterSettingGroup.SetActive(true);
+            backgroundSettingGroup.SetActive(false);
+        }
+        else
+        {
+            characterSettingGroup.SetActive(false);
+            backgroundSettingGroup.SetActive(true);
+        }
+
+    }
 }

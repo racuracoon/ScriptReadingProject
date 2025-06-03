@@ -10,15 +10,28 @@ public class FeedbackMemoryStore : MonoBehaviour
     // 리스트에 저장
     public static void Add(AudioClip audioClip, int lineId, List<float> scores, string feedbackComment)
     {
-        FeedbackData feedback = new FeedbackData();
-        feedback.feedbackId = Guid.NewGuid().ToString();
-        MicClipStore.Store(lineId, audioClip);
-        feedback.lineId = lineId;
-        feedback.scores = scores;
-        feedback.commet = feedbackComment;
+        // 같은 lineId가 있는지 확인
+        FeedbackData existing = feedbackList.Find(f => f.lineId == lineId);
 
-        feedbackList.Add(feedback);
-        Debug.Log("피드백 추가됨");
+        if (existing != null)
+        {
+            // 이미 있으면 덮어쓰기
+            MicClipStore.Store(lineId, audioClip);
+            existing.scores = scores;
+            existing.commet = feedbackComment;
+        }
+        else
+        {
+            // 새로 추가
+            FeedbackData feedback = new FeedbackData();
+            feedback.feedbackId = Guid.NewGuid().ToString();
+            MicClipStore.Store(lineId, audioClip);
+            feedback.lineId = lineId;
+            feedback.scores = scores;
+            feedback.commet = feedbackComment;
+
+            feedbackList.Add(feedback);
+        }
     }
 
     // 저장된 특정 피드백 반환

@@ -42,9 +42,6 @@ public class ScriptDataHandler
         {
             foreach (var scene in ScriptMemoryStore.currentScript.scenes)
             {
-                Debug.Log($"메모리:{scene.sceneNumber}");
-                Debug.Log($"업데이트 씬 : {updatingScene.sceneNumber}");
-
                 if (scene.sceneNumber == updatingScene.sceneNumber)
                 {
                     find = true;

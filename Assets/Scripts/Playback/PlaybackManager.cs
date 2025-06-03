@@ -10,6 +10,9 @@ public class PlaybackManager : MonoBehaviour
     public KeyboardInputListener keyboardInputListener;
     public MicInputListener micInputListener;
     public CaptionPanel captionPanel;
+    public MessagePanel messagePanel;
+    public PanelController panelController;
+
 
     public void SetCurrentScene(SceneData scene)
     {
@@ -20,6 +23,24 @@ public class PlaybackManager : MonoBehaviour
     {
         uIControllerInPlay.OpenPlayPanel();
         keyboardInputListener.StartListening();
+    }
+
+    public void EndPlay()
+    {
+        uIControllerInPlay.ClosePlayPanel();
+        keyboardInputListener.EndListening();
+        Camera mainCam = GameObject.FindWithTag("MainCamera")?.GetComponent<Camera>();
+        if (mainCam != null)
+        {
+            mainCam.enabled = true;
+
+            AudioListener listener = mainCam.GetComponent<AudioListener>();
+            if (listener != null)
+                listener.enabled = true;
+        }
+        AvatarLoaderOnPlay.DestroyAllAvatars();
+        panelController.OpenReadingSetupPanel();
+        FeedbackMemoryStore.Clear();
     }
 
     public async Task PlayCurrentLine()
@@ -51,10 +72,6 @@ public class PlaybackManager : MonoBehaviour
                 await CommandSayLine(currentSpeaker, currentLineId);
             }
         }
-        else
-        {
-            Debug.Log("다음 대사가 없습니다");
-        }
     }
 
     public async Task PlayPreviousLine()
@@ -66,7 +83,7 @@ public class PlaybackManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("이전 대사가 없습니다.");
+            messagePanel.OpenTemporaryPanel("이전 대사가 없습니다.");
         }
     }
 
@@ -79,7 +96,7 @@ public class PlaybackManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("더 이상 대사가 없습니다.");
+            messagePanel.OpenTemporaryPanel("다음 대사가 없습니다.");
         }
     }
 
@@ -93,5 +110,10 @@ public class PlaybackManager : MonoBehaviour
     {
         AvatarBehaviour avatarBehaviour = speaker.avatar.GetComponent<AvatarBehaviour>();
         await avatarBehaviour.SayLine(lineId);
+    }
+
+    public void ExitPlay()
+    {
+
     }
 }

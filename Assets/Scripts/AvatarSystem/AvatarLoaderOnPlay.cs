@@ -8,6 +8,8 @@ public class AvatarLoaderOnPlay
     private static float floorY; // floor의 Y 위치 (자동 설정)
     private static Vector3 speakingPosition;
 
+    private static List<GameObject> spawnedAvatars = new List<GameObject>(); // ✅ 추가됨
+
     public static async Task SpawnAvatar(List<CharacterData> characters, Transform floorTransform, TTSService ttsService)
     {
         List<CharacterData> AICharacters = new List<CharacterData>();
@@ -76,7 +78,7 @@ public class AvatarLoaderOnPlay
 
         loader.OnCompleted += (sender, args) =>
         {
-            OnAvatarLoaded(args, position, characterData, ttsService); // ✅ 이거 꼭 필요!!
+            OnAvatarLoaded(args, position, characterData, ttsService); 
             tcs.TrySetResult(args.Avatar);
         };
 
@@ -136,6 +138,7 @@ public class AvatarLoaderOnPlay
         {
             avatar.AddComponent<UserAvatarCamera>();
         }
+
         AudioSource avatarAudio = avatar.GetComponent<AudioSource>();
         if (avatarAudio == null)
         {
@@ -143,9 +146,11 @@ public class AvatarLoaderOnPlay
             avatarAudio.spatialBlend = 1.0f;
             avatarAudio.playOnAwake = false;
         }
+
         avatar.AddComponent<AvatarBehaviour>();
         characterData.avatar = avatar;
-        // 2. CharacterData 주입
+        spawnedAvatars.Add(avatar); // 스폰된 아바타 목록에 저장장
+
         AvatarBehaviour avatarBehaviour = avatar.GetComponent<AvatarBehaviour>();
         avatarBehaviour.Init(avatar, avatarAudio, ttsService, finalPosition);
         avatar.name = characterData.name;
@@ -184,5 +189,17 @@ public class AvatarLoaderOnPlay
     public static void MoveAvatarToSpeakingPosition(GameObject avatar)
     {
         avatar.transform.position = speakingPosition;
+    }
+
+    // ✅ 모든 아바타 제거 함수
+    public static void DestroyAllAvatars()
+    {
+        foreach (GameObject avatar in spawnedAvatars)
+        {
+            if (avatar != null)
+                GameObject.Destroy(avatar);
+        }
+        spawnedAvatars.Clear();
+        Debug.Log("🧹 모든 아바타 제거 완료");
     }
 }

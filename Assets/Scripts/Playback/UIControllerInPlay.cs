@@ -16,6 +16,7 @@ public class UIControllerInPlay : MonoBehaviour
     public MicInputListener micInputListener;
     public Button micBtn;
     public TMP_Text micBtn_text;
+    public Button exitBtn;
 
     private bool isOpenCaption = false;
     private bool isOnMic = false;
@@ -31,6 +32,7 @@ public class UIControllerInPlay : MonoBehaviour
         micBtn.gameObject.SetActive(false);
         controllGuidePanel.SetActive(false);
         playBtn.gameObject.SetActive(true);
+        exitBtn.onClick.AddListener(OnClickExitBtn);
         playBtn.onClick.AddListener(OnClickPlayBtn);
         micBtn.onClick.AddListener(OnClickMicBtn);
     }
@@ -53,6 +55,7 @@ public class UIControllerInPlay : MonoBehaviour
 
     private async void OnClickPlayBtn()
     {
+        Debug.Log("플레이");
         playBtn.gameObject.SetActive(false);
         controllGuidePanel.SetActive(true);
         captionPanel.gameObject.SetActive(true);
@@ -74,6 +77,11 @@ public class UIControllerInPlay : MonoBehaviour
             isOnMic = false;
             micBtn_text.text = "말하기 시작";
         }
+    }
+
+    private void OnClickExitBtn()
+    {
+        playbackManager.EndPlay();
     }
 
     public void SwitchCaptionPanel()

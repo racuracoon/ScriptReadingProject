@@ -1,4 +1,5 @@
 using TMPro;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,7 @@ public class InputScenePanel : MonoBehaviour
     public DialogueListContainer dialogueListContainer;
     public SceneManager sceneManager;
     public PanelController panelController;
+    public MessagePanel messagePanel;
 
     private SceneData updatingScene = null;
 
@@ -38,23 +40,27 @@ public class InputScenePanel : MonoBehaviour
 
         if (!string.IsNullOrEmpty(title))
         {
+            bool isSave;
             if (updatingScene == null)
             {
-                sceneManager.SaveScene(title);
+                isSave = sceneManager.SaveScene(title);
             }
             else
             {
-                sceneManager.UpdateScene(updatingScene, title);
+                isSave = sceneManager.UpdateScene(updatingScene, title);
                 updatingScene = null;
             }
+            if (isSave)
+            {
+                Debug.Log("씬이 저장 되었습니다.");
+                ClearInput();
+                panelController.OpenInputScriptPanel();
+            }
 
-            Debug.Log("씬이 저장 되었습니다.");
-            ClearInput();
-            panelController.OpenInputScriptPanel();
         }
         else
         {
-            Debug.LogWarning("저장 하려면 씬 제목을 입력해 주세요");
+            messagePanel.OpenTemporaryPanel("저장 하려면 씬 제목을 입력해 주세요");
         }
     }
 

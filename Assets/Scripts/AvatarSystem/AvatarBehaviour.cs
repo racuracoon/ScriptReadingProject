@@ -31,6 +31,6 @@ public class AvatarBehaviour : MonoBehaviour
 
     public void MoveToSpeakingPosition()
     {
-        // AvatarLoaderOnPlay에 있는 함수 여기로 옮겨야 함함
+        // AvatarLoaderOnPlay에 있는 함수 여기로 옮겨야 함
     }
 }

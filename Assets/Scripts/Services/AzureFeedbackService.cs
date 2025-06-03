@@ -10,6 +10,8 @@ public class AzureFeedbackService : MonoBehaviour
 {
     public string serverUrl = "http://localhost:5000/analyze-speech";
     public FeedbackContainer feedbackContainer;
+    public MessagePanel messagePanel;
+    public UIControllerInPlay uIControllerInPlay;
 
     public void RequestFeedback(AudioClip clip, int lineId)
     {
@@ -24,48 +26,52 @@ public class AzureFeedbackService : MonoBehaviour
     }
 
     IEnumerator SendRequest(AudioClip clip, byte[] wavBytes, int lineId)
-{
-    Dialogue dialogue = ScriptMemoryStore.GetDialougeByLineId(lineId);
-    string line = dialogue.line;
-
-    WWWForm form = new WWWForm();
-    form.AddBinaryData("audio", wavBytes, "recorded.wav", "audio/wav");
-    form.AddField("reference_text", line);
-
-    using (UnityWebRequest www = UnityWebRequest.Post(serverUrl, form))
     {
-        Debug.Log("📡 응답 대기중...");
-        www.timeout = 30;
-        yield return www.SendWebRequest();
+        Dialogue dialogue = ScriptMemoryStore.GetDialougeByLineId(lineId);
+        string line = dialogue.line;
 
-        if (www.result != UnityWebRequest.Result.Success)
+        WWWForm form = new WWWForm();
+        form.AddBinaryData("audio", wavBytes, "recorded.wav", "audio/wav");
+        form.AddField("reference_text", line);
+
+        using (UnityWebRequest www = UnityWebRequest.Post(serverUrl, form))
         {
-            Debug.LogError("❌ 서버 응답 실패: " + www.error);
-            yield break;
+            Debug.Log("📡 응답 대기중...");
+            messagePanel.OpenPanel("피드백 생성중 ...");
+            www.timeout = 30;
+            yield return www.SendWebRequest();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("❌ 서버 응답 실패: " + www.error);
+                messagePanel.OpenTemporaryPanel("피드백 서버 응답 실패");
+                yield break;
+            }
+
+            JObject data = JObject.Parse(www.downloadHandler.text);
+
+            var p = data["pronunciation"];
+            float accuracy = (float)p["AccuracyScore"];
+            float fluency = (float)p["FluencyScore"];
+            float completeness = (float)p["CompletenessScore"];
+            float pron = (float)p["PronScore"];
+
+            List<float> scores = new List<float> { accuracy, fluency, completeness };
+
+            var omitted = data["pronunciation_details"]?["omitted_words"];
+            var unclear = data["pronunciation_details"]?["unclear_pronunciations"];
+
+            List<string> omittedWords = omitted?.Select(w => w.ToString()).ToList() ?? new List<string>();
+            List<string> unclearWords = unclear?.Select(w => w.ToString()).ToList() ?? new List<string>();
+
+            string feedback = GenerateFeedback(accuracy, completeness, fluency, omittedWords, unclearWords);
+
+            FeedbackMemoryStore.Add(clip, lineId, scores, feedback);
+            feedbackContainer.LoadFeedbackList();
+            messagePanel.ClosePanel();
+            uIControllerInPlay.SwitchFeedbackPanel();
         }
-
-        JObject data = JObject.Parse(www.downloadHandler.text);
-
-        var p = data["pronunciation"];
-        float accuracy = (float)p["AccuracyScore"];
-        float fluency = (float)p["FluencyScore"];
-        float completeness = (float)p["CompletenessScore"];
-        float pron = (float)p["PronScore"];
-
-        List<float> scores = new List<float> { accuracy, fluency, completeness };
-
-        var omitted = data["pronunciation_details"]?["omitted_words"];
-        var unclear = data["pronunciation_details"]?["unclear_pronunciations"];
-
-        List<string> omittedWords = omitted?.Select(w => w.ToString()).ToList() ?? new List<string>();
-        List<string> unclearWords = unclear?.Select(w => w.ToString()).ToList() ?? new List<string>();
-
-        string feedback = GenerateFeedback(accuracy, completeness, fluency, omittedWords, unclearWords);
-
-        FeedbackMemoryStore.Add(clip, lineId, scores, feedback);
-        feedbackContainer.LoadFeedbackList();
     }
-}
 
     string GenerateFeedback(float acc, float comp, float flu, List<string> omittedWords, List<string> unclearWords)
     {

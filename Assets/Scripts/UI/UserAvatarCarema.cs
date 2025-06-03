@@ -33,7 +33,12 @@ public class UserAvatarCamera : MonoBehaviour
 
         // 카메라 위치 및 회전
         camObj.transform.position = eyeCenter + positionOffset;
-        camObj.transform.rotation = Quaternion.LookRotation(transform.forward);
+
+        // ✅ X축으로 -10.2도 기울여서 회전 적용
+        Quaternion xTilt = Quaternion.Euler(10.2f, 0f, 0f);
+        camObj.transform.rotation = xTilt * Quaternion.LookRotation(transform.forward);
+
+        // 부모 설정
         camObj.transform.SetParent(transform);
 
         // 기존 메인 카메라 비활성화

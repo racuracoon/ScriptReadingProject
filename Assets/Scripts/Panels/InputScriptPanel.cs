@@ -9,6 +9,7 @@ public class InputScriptPanel : MonoBehaviour
     public Button addSceneBtn;
     public TMP_InputField scriptTitleInput;
     public SceneListContainer sceneListContainer;
+    public MessagePanel messagePanel;
 
     public PanelController panelController;
 
@@ -34,7 +35,7 @@ public class InputScriptPanel : MonoBehaviour
         }
         else
         {
-            Debug.Log("Script를 저장하려면 제목을 입력해야 합니다.");
+            messagePanel.OpenTemporaryPanel("Script를 저장하려면 제목을 입력해야 합니다.");
         }
     }
 }
