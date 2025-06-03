@@ -6,7 +6,6 @@ public class ReadingSetupPanel : MonoBehaviour
 {
     public Button backToMainBtn;
     public Button playBtn;
-    private SceneData selectedScene;
     public PanelController panelController;
     public Transform floorTransform;
     public SceneDetailContainer sceneDetailContainer;
@@ -16,6 +15,8 @@ public class ReadingSetupPanel : MonoBehaviour
     public PlaybackManager playbackManager;
     public UIControllerInPlay uIControllerInPlay;
     public MessagePanel messagePanel;
+    private SceneData selectedScene;
+    private bool isSceneSelected = false;
 
     public void Start()
     {
@@ -31,31 +32,42 @@ public class ReadingSetupPanel : MonoBehaviour
 
     private async void OnClickPlayBtn()
     {
-        ClearAll();
-        if (selectedScene != null)
+        if (isSceneSelected)
         {
-            List<CharacterData> characters = CharacterObjectManager.GetCharacterListByScene(selectedScene);
-            playbackManager.SetCurrentScene(selectedScene);
-            messagePanel.OpenPanel("리딩 환경을 준비 중입니다.\n잠시만 기다려 주세요.");
-            // TTS 요청 먼저
-            await ttsService.RequestTTSAsync(selectedScene);
+            if (playableCharacterContainer.isCharacterSelected)
+            {
+                List<CharacterData> characters = CharacterObjectManager.GetCharacterListByScene(selectedScene);
+                playbackManager.SetCurrentScene(selectedScene);
+                messagePanel.OpenPanel("리딩 환경을 준비 중입니다.\n잠시만 기다려 주세요.");
+                // TTS 요청 먼저
+                await ttsService.RequestTTSAsync(selectedScene);
 
-            // 아바타 로딩 완료까지 대기
-            await AvatarLoaderOnPlay.SpawnAvatar(characters, floorTransform, ttsService);
+                // 아바타 로딩 완료까지 대기
+                await AvatarLoaderOnPlay.SpawnAvatar(characters, floorTransform, ttsService);
 
-            // 패널 닫고 리딩 시작
-            messagePanel.ClosePanel();
-            panelController.CloseAll();
-            playbackManager.StartPlay();
+                isSceneSelected = false;
+                // 패널 닫고 리딩 시작
+                ClearAll();
+                messagePanel.ClosePanel();
+                panelController.CloseAll();
+                playbackManager.StartPlay();
+            }
+            else
+            {
+                messagePanel.OpenTemporaryPanel("플레이할 역할을 선택하셔야 플레이할 수 있습니다.");
+                return;
+            }
         }
         else
         {
-            messagePanel.OpenTemporaryPanel("플레이할 캐릭터를 선택하셔야 플레이할 수 있습니다.");
+            messagePanel.OpenTemporaryPanel("플레이할 씬을을 선택하셔야 플레이할 수 있습니다.");
+            return;
         }
     }
 
     public void SetSelectedScene(SceneData scene)
     {
+        isSceneSelected = true;
         selectedScene = scene;
         sceneDetailContainer.LoadSceneDetail(selectedScene);
         playableCharacterContainer.LoadPlayableCharacterBtn(selectedScene);

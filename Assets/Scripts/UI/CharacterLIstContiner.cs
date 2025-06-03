@@ -15,7 +15,6 @@ public class CharacterLIstContiner : MonoBehaviour
 
         float currentY = 0f;
         float buttonHeight = 80f;
-
         foreach (CharacterData character in CharacterMemoryStore.characterList)
         {
             GameObject characterBtn = Instantiate(characterButtonPrefab, characterListParent);

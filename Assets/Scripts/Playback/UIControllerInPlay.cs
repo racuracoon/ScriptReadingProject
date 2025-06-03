@@ -70,12 +70,14 @@ public class UIControllerInPlay : MonoBehaviour
             micInputListener.StartMic(lineId);
             isOnMic = true;
             micBtn_text.text = "말하기 종료";
+            DisplayMicIMG();
         }
         else
         {
             micInputListener.StopMic();
             isOnMic = false;
             micBtn_text.text = "말하기 시작";
+            UndisplayMicIMG();
         }
     }
 

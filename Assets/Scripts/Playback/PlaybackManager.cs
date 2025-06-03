@@ -62,12 +62,10 @@ public class PlaybackManager : MonoBehaviour
             if (currentSpeaker.isUser)
             {
                 uIControllerInPlay.setLineId(currentLineId);
-                uIControllerInPlay.DisplayMicIMG();
                 uIControllerInPlay.DisplayMicBtn();
             }
             else
             {
-                uIControllerInPlay.UndisplayMicIMG();
                 uIControllerInPlay.UndisplayMicBtn();
                 await CommandSayLine(currentSpeaker, currentLineId);
             }

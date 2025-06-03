@@ -43,18 +43,40 @@ public class SceneManager : MonoBehaviour
         bool validate = ValidateDialogues();
         if (!validate) return false;
 
+        // 🔹 새로 입력된 대사 목록
         var dialogues = DialogueManager.GetDialoguesFromContainer(dialogueListContainer.dialogueListContainer);
         var sceneToUpdate = GetSceneByNumber(updateScene.sceneNumber);
-
         if (sceneToUpdate == null)
         {
             Debug.Log("⚠ 해당 sceneNumber의 씬을 찾지 못했습니다.");
             return false;
         }
 
+        // 🔹 기존 캐릭터 목록 추출
+        HashSet<string> oldCharacterNames = new HashSet<string>();
+        foreach (var dialogue in sceneToUpdate.dialogues)
+            oldCharacterNames.Add(dialogue.character);
+
+        // 🔹 새로운 캐릭터 목록 추출
+        HashSet<string> newCharacterNames = new HashSet<string>();
+
+        foreach (var dialogue in dialogues)
+                newCharacterNames.Add(dialogue.character);
+
+        // 🔹 차집합 구하기 (삭제된 캐릭터)
+        List<string> removedCharacters = new List<string>();
+        foreach (string oldName in oldCharacterNames)
+        {
+            if (!newCharacterNames.Contains(oldName))
+                removedCharacters.Add(oldName);
+        }
+
+        // 🔹 삭제된 캐릭터 보고
+        CharacterMemoryStore.ReportRemovedCharacters(updateScene, removedCharacters); 
+
+        // 🔹 씬 업데이트
         sceneToUpdate.title = sceneTitle;
         sceneToUpdate.dialogues = dialogues;
-
         DialogueManager.GrantDialogueId(sceneToUpdate);
 
         CharacterObjectManager.CreateCharacterObject();
@@ -62,6 +84,7 @@ public class SceneManager : MonoBehaviour
         Debug.Log($"✅ 씬 #{sceneToUpdate.sceneNumber} 수정 완료: {sceneToUpdate.title}");
         return true;
     }
+
 
     public static SceneData CreateScene(string title, List<Dialogue> dialogues)
     {
@@ -116,7 +139,7 @@ public class SceneManager : MonoBehaviour
                 }
             }
             else return false;
-            
+
         }
         return true;
     }

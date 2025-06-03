@@ -16,6 +16,7 @@ public class EnvironmentSetupPanel : MonoBehaviour
     public Button loadImageBtn;
     public Button applyImageBtn;
     public BackgroundImageLoader backgroundImageLoader;
+    public RawImage backgruondPreviewImage;
 
     public GameObject characterSettingGroup;
     public GameObject backgroundSettingGroup;
@@ -38,7 +39,9 @@ public class EnvironmentSetupPanel : MonoBehaviour
         modeBtn.onClick.AddListener(onClickModeBtn);
         loadImageBtn.onClick.AddListener(onClickLoadImageBtn);
         applyImageBtn.onClick.AddListener(OnClickApplyImageBtn);
+        imagePathInput.readOnly = true;
         SwitchMode(Mode.CharacterSetting);
+        imagePathInput.onValueChanged.AddListener(OnImagePathEdited);
     }
 
     public void OnClickBackToMainBtn()
@@ -85,6 +88,7 @@ public class EnvironmentSetupPanel : MonoBehaviour
     private void onClickLoadImageBtn()
     {
         imagePathInput.text = backgroundImageLoader.LoadImage();
+
     }
 
     private void OnClickApplyImageBtn()
@@ -122,5 +126,43 @@ public class EnvironmentSetupPanel : MonoBehaviour
             backgroundSettingGroup.SetActive(true);
         }
 
+    }
+
+    private void OnImagePathEdited(string path)
+    {
+        Debug.Log('a');
+        Debug.Log(path);
+        if (string.IsNullOrEmpty(path)) return;
+
+        Texture2D tex = backgroundImageLoader.LoadImageTexture(path);
+
+        if (tex != null)
+        {
+            backgruondPreviewImage.texture = tex;
+            backgruondPreviewImage.color = Color.white;
+
+            // ✅ 고정 크기 + 비율 유지
+            float maxWidth = 500f;
+            float maxHeight = 300f;
+            float aspect = (float)tex.width / tex.height;
+
+            float targetWidth = maxWidth;
+            float targetHeight = maxWidth / aspect;
+
+            if (targetHeight > maxHeight)
+            {
+                targetHeight = maxHeight;
+                targetWidth = maxHeight * aspect;
+            }
+
+            backgruondPreviewImage.rectTransform.sizeDelta = new Vector2(targetWidth, targetHeight);
+
+            backgruondPreviewImage.gameObject.SetActive(true);
+        }
+        else
+        {
+            backgruondPreviewImage.texture = null;
+            backgruondPreviewImage.gameObject.SetActive(false);
+        }
     }
 }

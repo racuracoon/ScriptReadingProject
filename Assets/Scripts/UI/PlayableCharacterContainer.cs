@@ -15,6 +15,7 @@ public class PlayableCharacterContainer : MonoBehaviour
     private string userCharacter;
     private Color normalColor = Color.white;
     private Color selectedColor = new Color(1f, 0.8f, 0.2f);
+    public bool isCharacterSelected = false;
 
     public void LoadPlayableCharacterBtn(SceneData scene)
     {
@@ -42,11 +43,9 @@ public class PlayableCharacterContainer : MonoBehaviour
             else
             {
                 allPlayabelCharacterBtn.Add(btn);
-
-                var capturedCharacter = character;
                 var capturedBtn = btn;
 
-                btn.onClick.AddListener(() => OnClickplayableCharacterBtn(capturedCharacter, capturedBtn));
+                btn.onClick.AddListener(() => OnClickplayableCharacterBtn(character, capturedBtn));
             }
             RectTransform btnRT = playableCharacterBtn.GetComponent<RectTransform>();
             btnRT.anchorMin = new Vector2(0f, 0.5f);
@@ -77,7 +76,7 @@ public class PlayableCharacterContainer : MonoBehaviour
             {
                 SetButtonColor(btn, normalColor);
             }
-
+            isCharacterSelected = true;
             selectedCharacter.isUser = true;
             SetButtonColor(selectedBtn, selectedColor);
             userCharacter = selectedCharacter.name;
@@ -85,6 +84,7 @@ public class PlayableCharacterContainer : MonoBehaviour
         }
         else if (userCharacter == selectedCharacter.name)
         {
+            isCharacterSelected = false;
             selectedCharacter.isUser = false;
             userCharacter = null;
             SetButtonColor(selectedBtn, normalColor);
@@ -108,5 +108,6 @@ public class PlayableCharacterContainer : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
+        isCharacterSelected = false;
     }
 }

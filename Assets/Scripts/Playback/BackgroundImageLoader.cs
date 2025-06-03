@@ -51,4 +51,13 @@ public class BackgroundImageLoader : MonoBehaviour
             return false;
         }
     }
+    public Texture2D LoadImageTexture(string path)
+    {
+        if (!System.IO.File.Exists(path)) return null;
+
+        byte[] data = System.IO.File.ReadAllBytes(path);
+        Texture2D tex = new Texture2D(2, 2);
+        tex.LoadImage(data);
+        return tex;
+    }
 }
